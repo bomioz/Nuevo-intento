@@ -1,25 +1,16 @@
-class AgarioClient {
-  constructor() {
-    console.log('AgarioClient cargado');
-  }
+const { createBot } = require('./bots/connect');
 
-  connect(region, partyCode) {
-    console.log(`🔗 Conectando a Agar.io en la región ${region} con código de party: ${partyCode}`);
-    // Aquí podrías poner la lógica real para conectar con Agar.io
-  }
+client.on('messageCreate', message => {
+  if (message.content.startsWith('!bots')) {
+    const args = message.content.split(' ');
+    const region = args[1]; // Ej: west
+    const party = args[2];  // Ej: NPEJCN
+    const cantidad = parseInt(args[3]) || 1;
 
-  followPlayer(playerId) {
-    console.log(`➡️ Siguiendo al jugador con ID: ${playerId}`);
-    // Aquí iría la lógica para que los bots sigan a ese jugador
-  }
+    for (let i = 0; i < cantidad; i++) {
+      createBot({ region, party, name: `Bot${i}` });
+    }
 
-  split() {
-    console.log('💥 Ejecutando split');
+    message.channel.send(`Conectando ${cantidad} bot(s) a la party ${party} en ${region}`);
   }
-
-  feed() {
-    console.log('🍕 Alimentando a los bots');
-  }
-}
-
-module.exports = AgarioClient;
+});
