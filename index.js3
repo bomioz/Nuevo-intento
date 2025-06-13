@@ -1,48 +1,34 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
-const AgarioClient = require('./agario-client');
+const { connectBots } = require('./bots/connect');
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
-
-const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
 client.once('ready', () => {
-  console.log(`🤖 Bot listo como ${client.user.tag}`);
+  console.log(`✅ Bot listo como ${client.user.tag}`);
 });
 
-client.login(BOT_TOKEN);
 client.on('messageCreate', async (message) => {
-  // Ignora mensajes del propio bot
-  if (message.author.bot) return;
+  if (!message.content.startsWith('!')) return;
 
-  // Verifica que el mensaje comience con !bots
-  if (message.content.startsWith('!bots')) {
-    const partes = message.content.split(' ');
-    if (partes.length < 4) {
-      return message.reply('❗ Uso: `!bots <codigo_party> <región> <acción>`');
+  const args = message.content.slice(1).trim().split(/ +/);
+  const [command, partyCode, region, mode] = args;
+
+  if (command === 'ping') {
+    message.reply('🏓 ¡Pong!');
+  }
+
+  if (command === 'bots') {
+    if (!partyCode || !region) {
+      return message.reply('❌ Uso correcto: `!bots <código_party> <región> [burst]`');
     }
 
-    const codigoParty = partes[1];
-    const region = partes[2];
-    const accion = partes[3];
-
-    message.reply(`🧠 Conectando bots a la región **${region}** con código **${codigoParty}**, acción: **${accion}**`);
-
-    // Aquí es donde se llamará al cliente de Agar.io
-    const bot = new AgarioClient();
-    bot.connect(region, codigoParty);
-
-    // Ejecuta la acción pedida
-    if (accion === 'seguirme') {
-      bot.followPlayer('ID-DE-EJEMPLO'); // Aquí iría tu ID o lógica real
-    } else if (accion === 'split') {
-      bot.split();
-    } else if (accion === 'feed') {
-      bot.feed();
-    } else {
-      message.reply('❓ Acción no reconocida. Usa: seguirme, split o feed.');
-    }
+    const burst = (mode === 'burst');
+    message.reply(`🔄 Conectando bots a la party ${partyCode} en ${region}...`);
+    connectBots(partyCode, region, message, burst);
   }
 });
+
+client.login(process.env.TOKEN);
