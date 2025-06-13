@@ -1,32 +1,34 @@
-const { createBot } = require('./bots/connect');
+require('dotenv').config();
+const { Client, GatewayIntentBits } = require('discord.js');
+const { connectBots } = require('./bots/connect');
 
-client.on('messageCreate', message => {
-  if (message.content.startsWith('!bots')) {
-    const args = message.content.split(' ');
-    const region = args[1]; // Ej: west
-    const party = args[2];  // Ej: NPEJCN
-    const cantidad = parseInt(args[3]) || 1;
-
-    for (let i = 0; i < cantidad; i++) {
-      createBot({ region, party, name: `Bot${i}` });
-    }
-
-    message.channel.send(`Conectando ${cantidad} bot(s) a la party ${party} en ${region}`);
-  }
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
-const { createBot } = require('./bots/connect');
+
+client.once('ready', () => {
+  console.log(`✅ Bot listo como ${client.user.tag}`);
+});
 
 client.on('messageCreate', async (message) => {
-  if (message.content.startsWith('!bots')) {
-    const args = message.content.split(' ');
-    const region = args[1]; // Ej: west
-    const party = args[2];  // Ej: NPEJCN
-    const cantidad = parseInt(args[3]) || 1;
+  if (!message.content.startsWith('!')) return;
 
-    for (let i = 0; i < cantidad; i++) {
-      createBot({ region, party, name: `Bot${i + 1}` });
+  const args = message.content.slice(1).trim().split(/ +/);
+  const [command, partyCode, region, mode] = args;
+
+  if (command === 'ping') {
+    message.reply('🏓 ¡Pong!');
+  }
+
+  if (command === 'bots') {
+    if (!partyCode || !region) {
+      return message.reply('❌ Uso correcto: `!bots <código_party> <región> [burst]`');
     }
 
-    message.channel.send(`🚀 Conectando ${cantidad} bot(s) a la party ${party} en región ${region}`);
+    const burst = (mode === 'burst');
+    message.reply(`🔄 Conectando bots a la party ${partyCode} en ${region}...`);
+    connectBots(partyCode, region, message, burst);
   }
 });
+
+client.login(process.env.TOKEN);
