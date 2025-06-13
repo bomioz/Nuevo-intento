@@ -1,0 +1,31 @@
+const Agario = require('./core/Agario');
+
+class AgarioBot {
+  constructor(partyCode, nickname = "Bot") {
+    this.partyCode = partyCode;
+    this.nickname = nickname;
+    this.bot = new Agario(this.partyCode, this.nickname);
+  }
+
+  start() {
+    this.bot.connect();
+  }
+
+  split() {
+    this.bot.split();
+  }
+
+  feed() {
+    this.bot.feed();
+  }
+
+  stop() {
+    this.bot.disconnect();
+  }
+
+  follow(playerId) {
+    this.bot.follow(playerId);
+  }
+}
+
+module.exports = AgarioBot;
