@@ -1,38 +1,33 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
+const { connectBots } = require('./bots/connect');
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 });
 
 client.once('ready', () => {
-  console.log('🤖 Bot listo!');
+  console.log(`Bot listo como ${client.user.tag}`);
 });
 
-client.on('messageCreate', message => {
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+
   if (message.content === '!ping') {
-    message.reply('🏓 Pong!');
+    return message.reply('Pong! ✅');
+  }
+
+  if (message.content.startsWith('!bots')) {
+    const args = message.content.split(' ');
+    const partyCode = args[1];
+    const region = args[2];
+
+    if (!partyCode || !region) {
+      return message.reply('Uso correcto: `!bots <código_party> <región>`');
+    }
+
+    connectBots(partyCode, region, message);
   }
 });
 
 client.login(process.env.DISCORD_TOKEN);
-const { createBot } = require('./bots/connect');
-
-client.on('messageCreate', async (message) => {
-  if (message.content.startsWith('!bots')) {
-    const args = message.content.split(' ');
-    const region = args[1]; // Ej: west
-    const party = args[2];  // Ej: NPEJCN
-    const cantidad = parseInt(args[3]) || 1;
-
-    for (let i = 0; i < cantidad; i++) {
-      createBot({ region, party, name: `Bot${i + 1}` });
-    }
-
-    message.channel.send(`🚀 Conectando ${cantidad} bot(s) a la party ${party} en región ${region}`);
-  }
-});
