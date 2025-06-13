@@ -1,0 +1,15 @@
+require('dotenv').config();
+const { Client, GatewayIntentBits } = require('discord.js');
+const AgarioClient = require('./agario-client');
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+});
+
+const BOT_TOKEN = process.env.DISCORD_TOKEN;
+
+client.once('ready', () => {
+  console.log(`🤖 Bot listo como ${client.user.tag}`);
+});
+
+client.login(BOT_TOKEN);
