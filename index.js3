@@ -13,3 +13,36 @@ client.once('ready', () => {
 });
 
 client.login(BOT_TOKEN);
+client.on('messageCreate', async (message) => {
+  // Ignora mensajes del propio bot
+  if (message.author.bot) return;
+
+  // Verifica que el mensaje comience con !bots
+  if (message.content.startsWith('!bots')) {
+    const partes = message.content.split(' ');
+    if (partes.length < 4) {
+      return message.reply('❗ Uso: `!bots <codigo_party> <región> <acción>`');
+    }
+
+    const codigoParty = partes[1];
+    const region = partes[2];
+    const accion = partes[3];
+
+    message.reply(`🧠 Conectando bots a la región **${region}** con código **${codigoParty}**, acción: **${accion}**`);
+
+    // Aquí es donde se llamará al cliente de Agar.io
+    const bot = new AgarioClient();
+    bot.connect(region, codigoParty);
+
+    // Ejecuta la acción pedida
+    if (accion === 'seguirme') {
+      bot.followPlayer('ID-DE-EJEMPLO'); // Aquí iría tu ID o lógica real
+    } else if (accion === 'split') {
+      bot.split();
+    } else if (accion === 'feed') {
+      bot.feed();
+    } else {
+      message.reply('❓ Acción no reconocida. Usa: seguirme, split o feed.');
+    }
+  }
+});
